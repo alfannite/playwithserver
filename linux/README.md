@@ -17,31 +17,31 @@ Cross-distro reference hub and command translation table covering systemd, Debia
 
 ## Cross-Distro Package Manager Translation
 
-| Operation | Debian / Ubuntu (`apt`) | RHEL / Rocky / Fedora (`dnf`) | Arch (`pacman`) | Alpine (`apk`) | openSUSE (`zypper`) |
+| Task | Debian (`apt`) | RHEL (`dnf`) | Arch (`pacman`) | Alpine (`apk`) | openSUSE (`zypper`) |
 | --- | --- | --- | --- | --- | --- |
-| Refresh repo metadata | `apt update` | `dnf makecache` | `pacman -Sy` | `apk update` | `zypper refresh` |
-| Full system upgrade | `apt update && apt full-upgrade` | `dnf upgrade --refresh` | `pacman -Syu` | `apk upgrade -U` | `zypper dup` (TW) / `zypper up` (Leap) |
-| Install package | `apt install <pkg>` | `dnf install <pkg>` | `pacman -S <pkg>` | `apk add <pkg>` | `zypper install <pkg>` |
-| Remove package + unused deps | `apt purge <pkg> && apt autoremove` | `dnf remove <pkg>` | `pacman -Rns <pkg>` | `apk del <pkg>` | `zypper remove -u <pkg>` |
-| Search packages | `apt search <term>` | `dnf search <term>` | `pacman -Ss <term>` | `apk search <term>` | `zypper search <term>` |
-| Find which pkg owns a file | `dpkg -S /path/to/file` | `rpm -qf /path/to/file` | `pacman -Qo /path/to/file` | `apk info --who-owns /path` | `rpm -qf /path/to/file` |
-| Find pkg providing unowned binary | `apt-file search bin/dig` | `dnf provides '*/dig'` | `pacman -F dig` | `apk search cmd:dig` | `zypper search --provides dig` |
-| List files in installed pkg | `dpkg -L <pkg>` | `rpm -ql <pkg>` | `pacman -Ql <pkg>` | `apk info -L <pkg>` | `rpm -ql <pkg>` |
-| Clean package cache | `apt clean` | `dnf clean all` | `paccache -r` | `apk cache clean` | `zypper clean --all` |
-| Hold / lock package version | `apt-mark hold <pkg>` | `dnf versionlock add <pkg>` | `IgnorePkg` in `/etc/pacman.conf` | `apk add '<pkg>=<ver>'` | `zypper addlock <pkg>` |
+| Refresh metadata | `apt update` | `dnf makecache` | `pacman -Sy` | `apk update` | `zypper ref` |
+| Full upgrade | `apt full-upgrade` | `dnf upgrade` | `pacman -Syu` | `apk upgrade -U` | `zypper dup` / `up` |
+| Install pkg | `apt install <p>` | `dnf install <p>` | `pacman -S <p>` | `apk add <p>` | `zypper in <p>` |
+| Remove + deps | `apt purge <p>` | `dnf remove <p>` | `pacman -Rns <p>` | `apk del <p>` | `zypper rm -u <p>` |
+| Search pkg | `apt search <q>` | `dnf search <q>` | `pacman -Ss <q>` | `apk search <q>` | `zypper se <q>` |
+| Owning pkg | `dpkg -S <file>` | `rpm -qf <file>` | `pacman -Qo <f>` | `apk info -W <f>` | `rpm -qf <file>` |
+| Provides bin | `apt-file search` | `dnf provides` | `pacman -F <bin>` | `apk search cmd:` | `zypper se --provides` |
+| List pkg files | `dpkg -L <p>` | `rpm -ql <p>` | `pacman -Ql <p>` | `apk info -L <p>` | `rpm -ql <p>` |
+| Clean cache | `apt clean` | `dnf clean all` | `paccache -r` | `apk cache clean` | `zypper clean -a` |
+| Lock version | `apt-mark hold` | `dnf versionlock` | `IgnorePkg` | `apk add p=ver` | `zypper al <p>` |
 
 > **Watch out:** Never run `pacman -Sy <pkg>` (partial upgrade) on Arch-family systems; updating the sync database without upgrading the system causes shared library mismatches and can break `pacman` or `glibc` itself. Always use `pacman -Syu <pkg>`.
 
 ## Init, Firewall, Networking, and MAC Comparison
 
-| Subsystem | Debian / Ubuntu | RHEL / Rocky / Fedora | Arch | Alpine | openSUSE / MicroOS |
+| Subsystem | Debian / Ubuntu | RHEL / Fedora | Arch | Alpine | openSUSE |
 | --- | --- | --- | --- | --- | --- |
-| Init system | `systemd` | `systemd` | `systemd` | `OpenRC` (`rc-service`, `rc-update`) | `systemd` |
-| Default firewall frontend | `ufw` or `nftables` | `firewalld` (`nftables` backend) | `nftables` or `ufw` | `nftables` / `awall` | `firewalld` |
-| Network stack | `netplan` (Ubuntu), `ifupdown`/`ifupdown2` (Debian/PVE) | `NetworkManager` (`nmcli`, `nmtui`) | `systemd-networkd` or `NetworkManager` | `/etc/network/interfaces` (`ifupdown-ng`) | `NetworkManager` or `wicked` (Leap) |
-| MAC framework | AppArmor (`aa-status`) | SELinux (`getenforce`, `semanage`) | None by default (optional AppArmor) | None by default (grsec/seccomp in containers) | AppArmor (Leap) / SELinux (TW/MicroOS) |
-| Time sync | `chrony` or `systemd-timesyncd` | `chrony` (`chronyc`) | `systemd-timesyncd` or `chrony` | `chrony` or `busybox ntpd` | `chrony` |
-| Automatic updates | `unattended-upgrades` | `dnf-automatic` | Manual (never blind auto-upgrade) | Manual / immutable image rebuild | `transactional-update.timer` (MicroOS) |
+| Init | `systemd` | `systemd` | `systemd` | `OpenRC` | `systemd` |
+| Firewall | `ufw` / `nft` | `firewalld` | `nft` / `ufw` | `nft` / `awall` | `firewalld` |
+| Network | `netplan` / `ifupdown2` | `NetworkManager` | `systemd-networkd` | `ifupdown-ng` | `NM` / `wicked` |
+| MAC | AppArmor | SELinux | Optional | None (seccomp) | AppArmor / SELinux |
+| Time sync | `chrony` / `timesyncd` | `chrony` | `timesyncd` / `chrony` | `chrony` | `chrony` |
+| Auto-patch | `unattended-upgrades` | `dnf-automatic` | Manual | Image rebuild | `transactional-update` |
 
 ## Related Scripts and Universal Guides
 
