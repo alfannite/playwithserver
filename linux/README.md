@@ -49,5 +49,6 @@ Cross-distro reference hub and command translation table covering systemd, Debia
 - [scripts/linux/debian-base-bootstrap.sh](../scripts/linux/debian-base-bootstrap.sh) — Standard Debian/Ubuntu server baseline
 - [scripts/linux/linux-sysprep-template.sh](../scripts/linux/linux-sysprep-template.sh) — Reset `machine-id`, SSH host keys, and cloud-init before VM cloning
 - [scripts/linux/firewalld-k8s-ports.sh](../scripts/linux/firewalld-k8s-ports.sh) — Configure `firewalld` for control-plane or worker nodes
+- [universal/cloud-init-images.md](../universal/cloud-init-images.md) — Direct official cloud-init image URLs (`.qcow2`/`.img`, no ISOs) for all major distros
 - [universal/ssh-mastery.md](../universal/ssh-mastery.md) — SSH multiplexing, ProxyJump, and key management
 - [universal/containers-ops.md](../universal/containers-ops.md) — Production Docker and Podman operations

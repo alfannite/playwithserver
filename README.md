@@ -14,13 +14,14 @@ Cross-platform infrastructure and systems administration field manual covering L
 | Windows | [windows/README.md](windows/README.md) | Windows Server (OpenSSH/Hyper-V/AD/IIS/WinRM), Windows Workstation (PS7/Sysinternals/winget), WSL2 |
 | macOS | [macos/README.md](macos/README.md) | System Admin (`launchd`/`pmset`/`diskutil`), Networking & Security (`pfctl`/`scutil`/SIP/FileVault), Headless Mac Server |
 | Android | [android/README.md](android/README.md) | ADB & Fastboot, Termux Pocket Linux Server, Root & Shizuku Ops, Mobile Networking |
-| Universal | [universal/ssh-mastery.md](universal/ssh-mastery.md) | SSH Mastery, Networking Toolkit, Containers Ops (Docker/Podman), Remote Access Mesh (Tailscale/WireGuard/Cloudflare/ZeroTier) |
+| Universal | [universal/ssh-mastery.md](universal/ssh-mastery.md) | SSH Mastery, Networking Toolkit, Containers Ops (Docker/Podman), Remote Access Mesh, [Cloud-Init OS Images](universal/cloud-init-images.md) |
 | Scripts | [scripts/README.md](scripts/README.md) | Runnable bootstrap, sysprep, Kubernetes firewall, WSL2 VHDX compaction, headless Mac, and Termux/ADB scripts |
 
 ## Quick Jump by Task
 
 | Operational Task | Direct Reference |
 | --- | --- |
+| Download official cloud-init VM images (no ISOs) | [universal/cloud-init-images.md](universal/cloud-init-images.md) (Debian, Ubuntu, Rocky, Alma, Fedora, Arch, Alpine, openSUSE, FreeBSD) |
 | Build a clean Linux VM template (K8s/Proxmox/KVM) | [linux/common/01-bootstrap.md](linux/common/01-bootstrap.md), [scripts/linux/rocky-k8s-template.sh](scripts/linux/rocky-k8s-template.sh), [scripts/linux/linux-sysprep-template.sh](scripts/linux/linux-sysprep-template.sh) |
 | Identify which process owns a listening port | [linux/common/05-troubleshooting.md](linux/common/05-troubleshooting.md), [windows/windows-server/05-troubleshooting.md](windows/windows-server/05-troubleshooting.md), [macos/networking-security/02-tools.md](macos/networking-security/02-tools.md) |
 | Diagnose SELinux, AppArmor, or firewalld/ufw drops | [linux/rhel-family/05-troubleshooting.md](linux/rhel-family/05-troubleshooting.md), [linux/debian-family/05-troubleshooting.md](linux/debian-family/05-troubleshooting.md), [scripts/linux/firewalld-k8s-ports.sh](scripts/linux/firewalld-k8s-ports.sh) |
@@ -74,6 +75,7 @@ playwithserver/
 │   ├── root-shizuku-ops/        # 01-05: Shizuku, Magisk/KernelSU, ACC charge limits, iptables
 │   └── mobile-networking/       # 01-05: PCAPdroid, WireGuard/Tailscale, gnirehtet, Private DNS
 ├── universal/
+│   ├── cloud-init-images.md
 │   ├── ssh-mastery.md
 │   ├── networking-toolkit.md
 │   ├── containers-ops.md
