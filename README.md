@@ -21,7 +21,7 @@ Cross-platform infrastructure and systems administration field manual covering L
 
 | Operational Task | Direct Reference |
 | --- | --- |
-| Download official cloud-init VM images (no ISOs) | [universal/cloud-init-images.md](universal/cloud-init-images.md) (Debian, Ubuntu, Rocky, Alma, Fedora, Arch, Alpine, openSUSE, FreeBSD) |
+| Download official cloud-init VM images & install tips | [universal/cloud-init-images.md](universal/cloud-init-images.md) (Debian, Ubuntu, Rocky, Alma, Fedora, AL2023, Arch, Alpine, openSUSE, CoreOS, Flatcar, Talos, Gentoo, Kali, FreeBSD, OpenWrt) |
 | Build a clean Linux VM template (K8s/Proxmox/KVM) | [linux/common/01-bootstrap.md](linux/common/01-bootstrap.md), [scripts/linux/rocky-k8s-template.sh](scripts/linux/rocky-k8s-template.sh), [scripts/linux/linux-sysprep-template.sh](scripts/linux/linux-sysprep-template.sh) |
 | Identify which process owns a listening port | [linux/common/05-troubleshooting.md](linux/common/05-troubleshooting.md), [windows/windows-server/05-troubleshooting.md](windows/windows-server/05-troubleshooting.md), [macos/networking-security/02-tools.md](macos/networking-security/02-tools.md) |
 | Diagnose SELinux, AppArmor, or firewalld/ufw drops | [linux/rhel-family/05-troubleshooting.md](linux/rhel-family/05-troubleshooting.md), [linux/debian-family/05-troubleshooting.md](linux/debian-family/05-troubleshooting.md), [scripts/linux/firewalld-k8s-ports.sh](scripts/linux/firewalld-k8s-ports.sh) |
