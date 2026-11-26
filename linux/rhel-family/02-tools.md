@@ -1,0 +1,199 @@
+# Rocky, AlmaLinux, RHEL 9, and Fedora Essential Tools
+
+Command reference for `dnf`, `rpm`, `nmcli`/`nmtui`, `firewalld`, SELinux policy tools, and `tuned-adm` with install commands, practical flags, and operational edge cases.
+
+[← Back to Linux](../README.md) | [Home](../../README.md)
+
+## Contents
+
+- [Package Management Reference](#package-management-reference)
+- [DNF and RPM Tooling](#dnf-and-rpm-tooling)
+- [NetworkManager CLI and TUI](#networkmanager-cli-and-tui)
+- [Firewall Management with firewalld](#firewall-management-with-firewalld)
+- [SELinux Inspection and Policy Tools](#selinux-inspection-and-policy-tools)
+- [System Tuning with tuned-adm](#system-tuning-with-tuned-adm)
+
+## Package Management Reference
+
+| Task | Command | Scope |
+| :--- | :--- | :--- |
+| Find which repo package provides a binary/file | `dnf provides '*/semanage'` | Enabled repositories |
+| Find which installed package owns a file | `rpm -qf /etc/chrony.conf` | Local RPM database |
+| List all files installed by a package | `rpm -ql nginx` | Local RPM database |
+| Verify file integrity against RPM checksums | `rpm -Va` | Local RPM database |
+| List security advisories pending install | `dnf updateinfo list security` | Enabled repositories |
+| Check if reboot or service restart is needed | `needs-restarting -r; needs-restarting -s` | Running processes & kernel |
+| View and undo DNF transactions | `dnf history list; dnf history undo <ID>` | Transaction history |
+
+## DNF and RPM Tooling
+
+### dnf, versionlock, and needs-restarting
+
+Pre-installed (`dnf`); install plugins via `dnf-utils` and `python3-dnf-plugin-versionlock`:
+
+`[ROOT]`
+```bash
+dnf install -y dnf-utils python3-dnf-plugin-versionlock
+```
+
+Usage:
+
+```bash
+# Find which package provides a missing command or library [NON-ROOT]
+dnf provides '*/dig'
+
+# Pin a package version so routine upgrades do not bump it [ROOT]
+dnf versionlock add postgresql16-server
+dnf versionlock list
+
+# Check if a kernel/glibc/systemd update requires a host reboot (exit code 1 = reboot needed) [NON-ROOT]
+needs-restarting -r
+
+# List running systemd services still using outdated shared libraries [ROOT]
+needs-restarting -s
+```
+
+> **Watch out:** On Fedora 41+, `dnf` is `dnf5`, where some plugin subcommands (such as `dnf5 versionlock` and `dnf5 needs-restarting`) have slightly different flags than `dnf4` on EL 9 (`needs-restarting` becomes `dnf needs-restarting`). Check `dnf --version` before deploying shared automation across Fedora and Rocky/RHEL 9.
+
+### rpm
+
+Pre-installed on all RHEL-family hosts.
+
+```bash
+# Inspect changelog of an installed package to check backported CVE fixes [NON-ROOT]
+rpm -q --changelog openssh-server | head -n 30
+
+# Show modified configuration files belonging to a package [NON-ROOT]
+rpm -V nginx
+
+# Query install scripts inside a downloaded RPM before installing it [NON-ROOT]
+rpm -qp --scripts ./vendor-agent.rpm
+```
+
+> **Watch out:** RHEL, Rocky, and AlmaLinux backport security patches into fixed upstream version numbers (for example, `openssh-8.7p1-43.el9`). Vulnerability scanners that only read banner strings produce false positives; verify CVE status via `rpm -q --changelog <pkg> | grep CVE-YYYY-NNNN` or `dnf updateinfo list --installed`.
+
+## NetworkManager CLI and TUI
+
+### nmcli and nmtui
+
+Pre-installed (`NetworkManager`, `NetworkManager-tui`):
+
+`[ROOT]`
+```bash
+dnf install -y NetworkManager NetworkManager-tui
+```
+
+Usage:
+
+```bash
+# Show concise device state and active IP/gateway/DNS details [NON-ROOT]
+nmcli -f DEVICE,TYPE,STATE,CONNECTION device status
+nmcli device show ens18
+
+# Interactive terminal UI for console recovery when SSH is down [ROOT]
+nmtui
+
+# Add a secondary IP address without interrupting the primary IP [ROOT]
+nmcli connection modify ens18 +ipv4.addresses 10.10.20.46/24
+nmcli connection up ens18
+
+# Reload edited keyfiles in /etc/NetworkManager/system-connections/ [ROOT]
+nmcli connection reload
+```
+
+> **Watch out:** Hand-edited keyfiles in `/etc/NetworkManager/system-connections/` must be owned by `root:root` with mode `0600`, or NetworkManager silently ignores them on `nmcli connection reload`.
+
+## Firewall Management with firewalld
+
+### firewall-cmd
+
+Pre-installed on Rocky/Alma/RHEL 9 and Fedora Server (`firewalld` backed by `nftables`).
+
+`[ROOT]`
+```bash
+dnf install -y firewalld
+systemctl enable --now firewalld
+```
+
+Usage:
+
+```bash
+# Inspect active zones, bound interfaces, services, ports, and rich rules [ROOT]
+firewall-cmd --get-active-zones
+firewall-cmd --list-all
+
+# Allow HTTPS permanently and activate immediately [ROOT]
+firewall-cmd --permanent --add-service=https
+firewall-cmd --reload
+
+# Restrict PostgreSQL to a specific source CIDR via a rich rule [ROOT]
+firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="10.10.20.0/24" port protocol="tcp" port="5432" accept'
+firewall-cmd --reload
+
+# Inspect the compiled nftables ruleset generated by firewalld [ROOT]
+nft list table inet firewalld | head -n 80
+```
+
+> **Watch out:** Running `firewall-cmd --add-port=...` without `--permanent` applies only to runtime state and vanishes after a reboot or `--reload`. Conversely, running **only** `--permanent` does not take effect until `--reload` is executed. Use `firewall-cmd --runtime-to-permanent` after verifying live runtime rules.
+
+## SELinux Inspection and Policy Tools
+
+### semanage, restorecon, setsebool, ausearch, and audit2allow
+
+Install policy utilities (`policycoreutils-python-utils` provides `semanage` and `audit2allow`):
+
+`[ROOT]`
+```bash
+dnf install -y policycoreutils-python-utils setroubleshoot-server audit
+```
+
+Usage:
+
+```bash
+# Check enforcement state and loaded policy [NON-ROOT]
+getenforce
+sestatus
+
+# Allow Nginx/httpd to listen on a non-standard port (e.g., 8443) [ROOT]
+semanage port -a -t http_port_t -p tcp 8443
+
+# Label a custom web root persistently and apply contexts immediately [ROOT]
+semanage fcontext -a -t httpd_sys_content_t '/srv/www(/.*)?'
+restorecon -Rv /srv/www
+
+# Allow Nginx to proxy outbound network connections persistently (-P) [ROOT]
+setsebool -P httpd_can_network_connect on
+
+# Inspect recent SELinux AVC denials with human-readable timestamps [ROOT]
+ausearch -m AVC,USER_AVC -ts recent
+```
+
+> **Watch out:** Never use `chcon` for permanent SELinux fixes; `restorecon` or a filesystem relabel overwrites `chcon` labels. Always register the path regex with `semanage fcontext -a` first, then run `restorecon -Rv`. Also remember `mv` preserves the *source* SELinux context (e.g., `user_home_t` moved into `/var/www/html/`), whereas `cp` inherits the destination directory's context.
+
+## System Tuning with tuned-adm
+
+### tuned-adm
+
+Install:
+
+`[ROOT]`
+```bash
+dnf install -y tuned
+systemctl enable --now tuned
+```
+
+Usage:
+
+```bash
+# Show active profile and list all available profiles [NON-ROOT]
+tuned-adm active
+tuned-adm list
+
+# Verify that current live kernel settings still match the active profile [ROOT]
+tuned-adm verify
+
+# Switch profile live (takes effect immediately) [ROOT]
+tuned-adm profile throughput-performance
+```
+
+> **Watch out:** `tuned` applies its own `sysctl` overrides after `/etc/sysctl.d/` at boot if `reapply_sysctl = 1` is not carefully accounted for in `/etc/tuned/tuned-main.conf`. Run `tuned-adm verify` or inspect `/usr/lib/tuned/<profile>/tuned.conf` whenever a `/etc/sysctl.d/` parameter appears mysteriously overwritten after reboot.

@@ -1,0 +1,42 @@
+# Curated Homebrew Brewfile for a 24/7 headless macOS server / ops box.
+# Apply with: brew bundle --file=scripts/macos/Brewfile.server
+
+# Core CLI & Shell Ergonomics
+brew "tmux"
+brew "htop"
+brew "btop"
+brew "ncdu"
+brew "jq"
+brew "yq"
+brew "ripgrep"
+brew "fd"
+brew "fzf"
+brew "rsync"
+brew "watch"
+brew "tree"
+brew "git"
+brew "gnupg"
+
+# Networking & Diagnostics
+brew "mtr"
+brew "nmap"
+brew "iperf3"
+brew "mosh"
+brew "doggo"
+brew "curl"
+brew "openssl@3"
+brew "wireguard-tools"
+brew "cloudflared"
+
+# Container & Virtualization Tooling (lightweight alternative to Docker Desktop)
+brew "colima"
+brew "docker"
+brew "docker-compose"
+brew "docker-buildx"
+brew "kubectl"
+
+# Optional Casks (uncomment if GUI/menu-bar apps are desired)
+# cask "orbstack"
+# cask "tailscale"
+# cask "lulu"
+# cask "utm"
